@@ -134,7 +134,7 @@ namespace RoRPC
                     SmallImageText = "https://github.com/sitiom/RoRPC",
                     LargeImageKey = GetLargeImageKey(),
                 },
-                Timestamps = new Timestamps(DateTime.UtcNow)
+                Timestamps = new Timestamps(_roblox.StartTime.ToUniversalTime())
             };
             _client.SetPresence(rp);
         }
