@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
@@ -24,6 +23,8 @@ namespace RoRPC
 
         private DiscordRpcClient _client;
         private Process _roblox;
+
+        private static readonly HttpClient client = new();
 
         public AppContext()
         {
@@ -122,9 +123,9 @@ namespace RoRPC
 
             string placeId = GetPlaceId(_roblox);
             dynamic gameInfo =
-                JObject.Parse(await HttpGetAsync($"https://api.roblox.com/marketplace/productinfo?assetId={placeId}"));
+                JObject.Parse(await client.GetStringAsync($"https://api.roblox.com/marketplace/productinfo?assetId={placeId}"));
 
-            RichPresence rp = new RichPresence
+            RichPresence rp = new()
             {
                 Details = gameInfo.Name ?? "(Unknown)",
                 State = $"by {gameInfo.Creator.Name ?? "(Unknown)"}",
@@ -183,17 +184,6 @@ namespace RoRPC
                 return placeId;
             }
             return null;
-        }
-
-        private static async Task<string> HttpGetAsync(string uri)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-            using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            await using Stream stream = response.GetResponseStream();
-            using StreamReader reader = new StreamReader(stream);
-            return await reader.ReadToEndAsync();
         }
     }
 }
